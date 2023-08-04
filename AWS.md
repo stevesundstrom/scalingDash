@@ -68,12 +68,12 @@ Perform the following modifications in order to connect to registered domain and
    1. Within the zones Hosted Zone Details, note the four DNS Name entries of the **NS** record
    2. Redefine the four DNS server entries on the Domains -> domain page to match the four defined within the Hosted Zone
    
-2. From EC2 -> Load Balancer -> **app-alb**, establish a secure connection to your domain 
-   1. Connect Load Balancer to Hosted Zone 
-      1. Create Record 
-      2. Click Alias 
-      3. Select Zone, Application Load Balancer, and target ALB 
-      4. Test your connection to the app using: http://appdomain.com
+2. From Route 53 -> Hosted Zones -> Hosted Zone connect Load Balancer to Hosted Zone 
+   1. Delete any A records for previous attempts, if necessary
+   2. Create Record 
+   3. Click Alias 
+   4. Select Zone, Application Load Balancer, and target ALB 
+   5. Test your connection to the app using: http://appdomain.com
       
 3. From Certificate Manager, request a Public Certificate for the domain
    1. Request a Public Certificate, Next
@@ -81,29 +81,23 @@ Perform the following modifications in order to connect to registered domain and
    3. Click on Pending Validation Certificate 
    4. Click on Add CNAME record in Route 53 and wait for Status=Issued
    
-4. Add https Listener to Load Balancer 
+4. From EC2 -> Load Balancers -> **app-alb** add https Listener to Load Balancer 
    1. Add Listener: HTTPS:443 
    2. Action: Forward to Target Group 
       1. Select Certificate 
       2. Add 
       3. Test with https://appdomain.com
       
-5. Have Load Balancer redirect port 80 traffic to https port 443 
-   1. Select Port 80 
-   2. Edit 
-   3. Remove
-   4. Add Action -> Redirect 
-   5. HTTPS: 443 
-   6. Wait a minute and test with http://appdomain.com redirecting to https://appdomain.com
-   
-6. Allow traffic to www.appdomain.com
-   1. From Route 53 -> Hosted Zone -> appdomain.com, click Create Record
-   2. Record Name: www.appdomain.com
-   3. Click Alias
-   4. Route traffic to: Application and Classic Load Balancer
-   5. Region: Cluster Region
-   6. Choose Load Balancer: **app-alb**
-   7. Create Records
+5. From EC2 -> Load Balancers -> **app-alb** have Load Balancer redirect port 80 traffic to https port 443 
+   1. Select HTTP:80 
+   2. Select Manage Rules -> Edit Rule 
+   3. Select Actions -> Delete Listener
+   4. Select Actions -> Add Listener
+      1. HTTP: 80
+      2. Redirect to URL
+      3. HTTPS: 443
+      4. Add 
+   5. Wait a minute and test with http://appdomain.com redirecting to https://appdomain.com
 
 The initial Public Certificate works for domain.com and www.appdomain.com.
 To support https traffic to any other host.appdomain.com address, an additional Public Certificate must be created for 
